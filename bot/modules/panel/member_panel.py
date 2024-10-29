@@ -15,7 +15,7 @@ from bot import bot, LOGGER, _open, emby_line, sakura_b, ranks, group, extra_emb
 from pyrogram import filters
 from bot.func_helper.emby import emby
 from bot.func_helper.filters import user_in_group_on_filter
-from bot.func_helper.utils import members_info, tem_alluser, cr_link_one
+from bot.func_helper.utils import members_info, tem_alluser, cr_link_one , open_check
 from bot.func_helper.fix_bottons import members_ikb, back_members_ikb, re_create_ikb, del_me_ikb, re_delme_ikb, \
     re_reset_ikb, re_changetg_ikb, emby_block_ikb, user_emby_block_ikb, user_emby_unblock_ikb, re_exchange_b_ikb, \
     store_ikb, re_bindtg_ikb, close_it_ikb, store_query_page, re_download_center_ikb, page_request_record_ikb, re_born_ikb
@@ -27,13 +27,14 @@ from bot.sql_helper.sql_emby import sql_get_emby, sql_update_emby, Emby, sql_del
 from bot.sql_helper.sql_emby2 import sql_get_emby2, sql_delete_emby2
 from bot.sql_helper.sql_request_record import sql_add_request_record, sql_get_request_record
 from bot.func_helper.moviepilot import search, add_download_task, get_download_task
+from bot.sql_helper.sql_emby import sql_count_emby
 
 
 
 # 创号函数
 async def create_user(_, call, us, stats):
     msg = await ask_return(call,
-                           text='🤖**注意：您已进入注册状态:\n\n• 请在2min内输入 `[用户名][空格][安全码]`\n• 举个例子🌰：`苏苏 1234`**\n\n• 用户名中不限制中/英文/emoji，🚫**特殊字符**'
+                           text='🤖**注意：您已进入注册状态:\n\n• 请在2min内输入 `[用户名][空格][安全码]`\n• 举个例子🌰：`abc 1234`**\n\n• 用户名中不限制中/英文/emoji，🚫**特殊字符**'
                                 '\n• 安全码为敏感操作时附加验证，请填入最熟悉的数字4~6位；退出请点 /cancel', timer=120,
                            button=close_it_ikb)
     if not msg:
@@ -47,8 +48,9 @@ async def create_user(_, call, us, stats):
     except (IndexError, ValueError):
         await msg.reply(f'⚠️ 输入格式错误\n\n`{msg.text}`\n **会话已结束！**')
     else:
-        if _open.tem >= _open.all_user: return await msg.reply(
-            f'**🚫 很抱歉，注册总数({_open.tem})已达限制({_open.all_user})。**')
+        tg_count, embyid_count, lv_a_count = sql_count_emby()
+        if embyid_count >= _open.all_user: return await msg.reply(
+            f'**🚫 很抱歉，注册总数已达限制。**')
         send = await msg.reply(
             f'🆗 会话结束，收到设置\n\n用户名：**{emby_name}**  安全码：**{emby_pwd2}** \n\n__正在为您初始化账户，更新用户策略__......')
         # emby api操作
@@ -96,10 +98,13 @@ async def members(_, call):
     if not data:
         return await callAnswer(call, '⚠️ 数据库没有你，请重新 /start录入', True)
     await callAnswer(call, f"✅ 用户界面")
+    stat, all_user, tem, timing = await open_check()
+    tg_count, embyid_count, lv_a_count = sql_count_emby()
     name, lv, ex, us, embyid, pwd2 = data
     text = f"▎__欢迎进入用户面板！{call.from_user.first_name}__\n\n" \
            f"**· 🆔 用户のID** | `{call.from_user.id}`\n" \
            f"**· 📊 当前状态** | {lv}\n" \
+           f"**· 🚗 剩余车位** | {_open.all_user - embyid_count}\n"\
            f"**· 🍒 积分{sakura_b}** | {us[0]} · {us[1]}\n" \
            f"**· 💠 账号名称** | [{name}](tg://user?id={call.from_user.id})\n" \
            f"**· 🚨 到期时间** | {ex}"

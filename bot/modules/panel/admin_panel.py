@@ -196,53 +196,42 @@ async def open_all_user_l(_, call):
 async def cr_link(_, call):
     await callAnswer(call, '✔️ 创建注册/续期码')
     send = await editMessage(call,
-                             f'🎟️ 请回复创建 [天数] [数量] [模式] [续期]\n\n'
+                             f'🎟️ 请回复创建 [天数] [数量] [模式]\n\n'
                              f'**天数**：月30，季90，半年180，年365\n'
                              f'**模式**： link -深链接 | code -码\n'
-                             f'**续期**： F - 注册码，T - 续期码\n'
-                             f'**示例**：`30 1 link T` 记作 30天一条续期深链接\n'
+                             f'**示例**：`30 1 link` 记作 30天一条注册/续期通用码\n'
                              f'__取消本次操作，请 /cancel__')
-    if send is False:
+    if not send:
         return
 
     content = await callListen(call, 120, buttons=re_cr_link_ikb)
-    if content is False:
+    if content is False or content.text == '/cancel':
+        await editMessage(call, '⭕ 您已经取消操作了。', buttons=re_cr_link_ikb)
         return
-    elif content.text == '/cancel':
-        await content.delete()
-        return await editMessage(call, '⭕ 您已经取消操作了。', buttons=re_cr_link_ikb)
+
     try:
-        await content.delete()
-        times, count, method, renew = content.text.split()
+        times, count, method = content.text.split()
         count = int(count)
         days = int(times)
-        if method != 'code' and method != 'link':
-            return editMessage(call, '⭕ 输入的method参数有误', buttons=re_cr_link_ikb)
+        if method not in ('code', 'link'):
+            return await editMessage(call, '⭕ 输入的method参数有误', buttons=re_cr_link_ikb)
     except (ValueError, IndexError):
         return await editMessage(call, '⚠️ 检查输入，有误。', buttons=re_cr_link_ikb)
-    else:
-        if renew == 'F':
-            links = await cr_link_one(call.from_user.id, times, count, days, method)
-            if links is None:
-                return await editMessage(call, '⚠️ 数据库插入失败，请检查数据库。', buttons=re_cr_link_ikb)
-            links = f"🎯 {bot_name}已为您生成了 **{days}天** 注册码 {count} 个\n\n" + links
-            chunks = [links[i:i + 4096] for i in range(0, len(links), 4096)]
-            for chunk in chunks:
-                await sendMessage(content, chunk, buttons=close_it_ikb)
-            await editMessage(call, f'📂 {bot_name}已为 您 生成了 {count} 个 {days} 天注册码', buttons=re_cr_link_ikb)
-            LOGGER.info(f"【admin】：{bot_name}已为 {content.from_user.id} 生成了 {count} 个 {days} 天注册码")
 
-        else:
-            links = await rn_link_one(call.from_user.id, times, count, days, method)
-            if links is None:
-                return await editMessage(call, '⚠️ 数据库插入失败，请检查数据库。', buttons=re_cr_link_ikb)
-            links = f"🎯 {bot_name}已为您生成了 **{days}天** 续期码 {count} 个\n\n" + links
-            chunks = [links[i:i + 4096] for i in range(0, len(links), 4096)]
-            for chunk in chunks:
-                await sendMessage(content, chunk, buttons=close_it_ikb)
-            await editMessage(call, f'📂 {bot_name}已为 您 生成了 {count} 个 {days} 天续期码', buttons=re_cr_link_ikb)
-            LOGGER.info(f"【admin】：{bot_name}已为 {content.from_user.id} 生成了 {count} 个 {days} 天续期码")
+    # 使用统一的生成方法生成通用码
+    links = await cr_link_one(call.from_user.id, times, count, days, method)
+    if links is None:
+        return await editMessage(call, '⚠️ 数据库插入失败，请检查数据库。', buttons=re_cr_link_ikb)
 
+    # 格式化并发送生成的链接或码
+    links = f"🎯 {bot_name}已为您生成了 **{days}天** 通用码 {count} 个\n\n" + links
+    chunks = [links[i:i + 4096] for i in range(0, len(links), 4096)]
+    for chunk in chunks:
+        await sendMessage(content, chunk, buttons=close_it_ikb)
+
+    # 最终反馈并记录日志
+    await editMessage(call, f'📂 {bot_name}已为您生成了 {count} 个 {days} 天通用码', buttons=re_cr_link_ikb)
+    LOGGER.info(f"【admin】：{bot_name}已为 {content.from_user.id} 生成了 {count} 个 {days} 天通用码")
 
 # 检索
 @bot.on_callback_query(filters.regex('ch_link') & admins_on_filter)

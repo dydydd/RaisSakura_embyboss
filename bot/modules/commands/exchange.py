@@ -12,11 +12,11 @@ from bot.sql_helper.sql_emby import sql_get_emby, Emby
 from bot.sql_helper import Session
 
 
-def is_renew_code(input_string):
-    if "Renew" in input_string:
-        return True
-    else:
-        return False
+# def is_renew_code(input_string):
+#     if "Renew" in input_string:
+#         return True
+#     else:
+#         return False
 
 
 async def rgs_code(_, msg, register_code):
@@ -28,9 +28,9 @@ async def rgs_code(_, msg, register_code):
     ex = data.ex
     lv = data.lv
     if embyid:
-        if not is_renew_code(register_code): return await sendMessage(msg,
-                                                                      "🔔 很遗憾，您使用的是注册码，无法启用续期功能，请悉知",
-                                                                      timer=60)
+        # if not is_renew_code(register_code): return await sendMessage(msg,
+        #                                                               "🔔 很遗憾，您使用的是注册码，无法启用续期功能，请悉知",
+        #                                                               timer=60)
         with Session() as session:
             # with_for_update 是一个排他锁，其实就不需要悲观锁或者是乐观锁，先锁定先到的数据使其他session无法读取，修改(单独似乎不起作用，也许是不能完全防止并发冲突，于是加入原子操作)
             r = session.query(Code).filter(Code.code == register_code).with_for_update().first()
@@ -70,9 +70,9 @@ async def rgs_code(_, msg, register_code):
             LOGGER.info(f"【续期码】：{msg.from_user.first_name}[{msg.chat.id}] 使用了 {register_code}，到期时间：{ex_new}")
 
     else:
-        if is_renew_code(register_code): return await sendMessage(msg,
-                                                                  "🔔 很遗憾，您使用的是续期码，无法启用注册功能，请悉知",
-                                                                  timer=60)
+        # if is_renew_code(register_code): return await sendMessage(msg,
+        #                                                           "🔔 很遗憾，您使用的是续期码，无法启用注册功能，请悉知",
+        #                                                           timer=60)
         if data.us > 0: return await sendMessage(msg, "已有注册资格，请先使用【注册】，勿重复其他注册码。")
         with Session() as session:
             # 我勒个豆，终于用 原子操作 + 排他锁 成功防止了并发更新

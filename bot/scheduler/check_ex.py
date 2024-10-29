@@ -129,12 +129,13 @@ async def check_expired():
                 LOGGER.error(e)
 
         else:
-            delta = c.ex + timedelta(days=5)
+            delta = c.ex + timedelta(days=2)
             if datetime.now() < delta:
                 continue
             if await emby.emby_del(c.embyid):
-                text = f'【到期检测】\n#id{c.tg} 删除账户 [{c.name}](tg://user?id={c.tg})\n已到期 5 天，执行清除任务。期待下次与你相遇'
+                text = f'【到期检测】\n#id{c.tg} 删除账户 [{c.name}](tg://user?id={c.tg})\n已到期 2 天，执行清除任务。期待下次与你相遇'
                 LOGGER.info(text)
+                
             else:
                 text = f'【到期检测】\n#id{c.tg} #删除账户 [{c.name}](tg://user?id={c.tg})\n到期删除失败，请检查以免无法进行后续使用'
                 LOGGER.warning(text)
