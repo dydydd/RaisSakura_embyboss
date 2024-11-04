@@ -64,7 +64,7 @@ async def rgs_code(_, msg, register_code):
                                   f'🎊 少年郎，恭喜你，已收到 [{first.first_name}](tg://user?id={tg1}) 的{us1}天🎁\n到期时间：{ex_new}__')
             session.commit()
             new_code = register_code[:-7] + "░" * 7
-            await sendMessage(msg,
+            await sendMessage(msg, 
                               f'· 🎟️ 续期码使用 - [{msg.from_user.first_name}](tg://user?id={msg.chat.id}) [{msg.from_user.id}] 使用了 {new_code}\n· 📅 实时到期 - {ex_new}',
                               send=True)
             LOGGER.info(f"【续期码】：{msg.from_user.first_name}[{msg.chat.id}] 使用了 {register_code}，到期时间：{ex_new}")
