@@ -64,7 +64,8 @@ async def create_whitelist_text(users, page):
     end = start + 20
     text = "**白名单用户列表**\n\n"
     for user in users[start:end]:
-        text += f"TGID: `{user.tg}` | Emby用户名: `{user.name}`\n"
+        
+        text += f"TGID: `{user.tg}` | Emby用户名: `{user.name}` | 到期时间: 永久\n"
     text += f"第 {page} 页,共 {math.ceil(len(users) / 20)} 页, 共 {len(users)} 人"
     return text
 
@@ -73,6 +74,6 @@ async def create_normaluser_text(users, page):
     end = start + 20
     text = "**普通用户列表**\n\n"
     for user in users[start:end]:
-        text += f"TGID: `{user.tg}` | Emby用户名: `{user.name}`\n"
+        text += f"TGID: `{user.tg}` | Emby用户名: `{user.name}` | 到期时间: `{user.ex.strftime('%Y-%m-%d')}`\n"
     text += f"第 {page} 页,共 {math.ceil(len(users) / 20)} 页, 共 {len(users)} 人"
     return text
