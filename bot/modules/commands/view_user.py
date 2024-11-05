@@ -74,7 +74,7 @@ async def create_normaluser_text(users, page):
     user_list = []
     current_time = datetime.now()
     for user in users:
-        days_left = (user.ex - current_time).total_seconds() / (24 * 3600)
+        days_left = int((user.ex - current_time).total_seconds() / (24 * 3600))
         user_list.append((user, days_left)) 
     user_list.sort(key=lambda x: x[1], reverse=True)
     start = (page - 1) * 10
