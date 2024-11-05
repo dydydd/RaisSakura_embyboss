@@ -6,6 +6,7 @@ from bot.func_helper.fix_bottons import whitelist_page_ikb, normaluser_page_ikb
 from bot.sql_helper.sql_emby import get_all_emby, Emby
 from bot.func_helper.msg_utils import callAnswer
 import math
+from datetime import datetime
 
 
 @bot.on_callback_query(filters.regex('^whitelist$') & admins_on_filter)
@@ -65,16 +66,21 @@ async def create_whitelist_text(users, page):
     text = "**白名单用户列表**\n\n"
     for user in users[start:end]:
         expire_date = "永久" if user.iv == 'a' else user.ex.strftime("%m-%d %H:%M") if user.ex else "未设置"
-        text += f"`{user.tg}` | `{user.name}` | `{expire_date}`\n"
+        text += f"`用户TGID: {user.tg}` | `Emby用户名: {user.name}` | `剩余天数: {expire_date}`\n"
     text += f"\n第 {page} 页,共 {math.ceil(len(users) / 10)} 页, 共 {len(users)} 人"
     return text
 
 async def create_normaluser_text(users, page):
+    user_list = []
+    current_time = datetime.now()
+    for user in users:
+        days_left = (user.ex - current_time).total_seconds() / (24 * 3600)
+        user_list.append((user, days_left)) 
+    user_list.sort(key=lambda x: x[1], reverse=True)
     start = (page - 1) * 10
     end = start + 10
     text = "**普通用户列表**\n\n"
-    for user in users[start:end]:
-        expire_date = "永久" if user.iv == 'b' else user.ex.strftime("%m-%d %H:%M") if user.ex else "未设置"
-        text += f"`{user.tg}` | `{user.name}` | `{expire_date}`\n"
+    for user, days_left in user_list[start:end]:
+        text += f"`用户TGID: {user.tg}` | `Emby用户名: {user.name}` | `剩余天数: {days_left}天`\n"
     text += f"\n第 {page} 页,共 {math.ceil(len(users) / 10)} 页, 共 {len(users)} 人"
     return text
