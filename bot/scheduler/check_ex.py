@@ -17,7 +17,7 @@ async def check_expired():
     rst = get_all_emby(and_(Emby.ex < datetime.now(), Emby.lv == 'b'))
     if rst is None:
         return LOGGER.info('【到期检测】- 等级 b 无到期用户，跳过')
-    dead_day = datetime.now() + timedelta(days=5)
+    dead_day = datetime.now() + timedelta(days=2)
     ext = (datetime.now() + timedelta(days=30))
     for r in rst:
         if r.us >= 30:
