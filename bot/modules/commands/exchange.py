@@ -46,23 +46,39 @@ async def rgs_code(_, msg, register_code):
             session.query(Code).filter(Code.code == register_code).with_for_update().update(
                 {Code.used: msg.from_user.id, Code.usedtime: datetime.now()})
             first = await bot.get_chat(tg1)
-            # 此处需要写一个判断 now和ex的大小比较。进行日期加减。
-            ex_new = datetime.now()
-            if ex_new > ex:
-                ex_new = ex_new + timedelta(days=us1)
+            # 获取正确的基准时间
+            base_time = max(datetime.now(), ex)
+            # 直接在基准时间上加上续期天数
+            ex_new = base_time + timedelta(days=us1)
+            
+            # 如果账号已过期,需要解封
+            if datetime.now() > ex:
                 await emby.emby_change_policy(id=embyid, method=False)
                 if lv == 'c':
-                    session.query(Emby).filter(Emby.tg == msg.from_user.id).update({Emby.ex: ex_new, Emby.lv: 'b'})
+                    session.query(Emby).filter(Emby.tg == msg.from_user.id).update(
+                        {Emby.ex: ex_new, Emby.lv: 'b'}
+                    )
                 else:
-                    session.query(Emby).filter(Emby.tg == msg.from_user.id).update({Emby.ex: ex_new})
-                await sendMessage(msg, f'🎊 少年郎，恭喜你，已收到 [{first.first_name}](tg://user?id={tg1}) 的{us1}天🎁\n'
-                                       f'__已解封账户并延长到期时间至(以当前时间计)__\n到期时间：{ex_new.strftime("%Y-%m-%d %H:%M:%S")}')
-            elif ex_new < ex:
-                ex_new = data.ex + timedelta(days=us1)
-                session.query(Emby).filter(Emby.tg == msg.from_user.id).update({Emby.ex: ex_new})
-                await sendMessage(msg,
-                                  f'🎊 少年郎，恭喜你，已收到 [{first.first_name}](tg://user?id={tg1}) 的{us1}天🎁\n到期时间：{ex_new}__')
+                    session.query(Emby).filter(Emby.tg == msg.from_user.id).update(
+                        {Emby.ex: ex_new}
+                    )
+                msg_text = (
+                    f'🎊 少年郎，恭喜你，已收到 [{first.first_name}](tg://user?id={tg1}) 的{us1}天🎁\n'
+                    f'__已解封账户并延长到期时间至(以当前时间计)__\n'
+                    f'到期时间：{ex_new.strftime("%Y-%m-%d %H:%M:%S")}'
+                )
+            else:
+                # 账号未过期,只需要延长时间
+                session.query(Emby).filter(Emby.tg == msg.from_user.id).update(
+                    {Emby.ex: ex_new}
+                )
+                msg_text = (
+                    f'🎊 少年郎，恭喜你，已收到 [{first.first_name}](tg://user?id={tg1}) 的{us1}天🎁\n'
+                    f'到期时间：{ex_new}'
+                )
+            
             session.commit()
+            await sendMessage(msg, msg_text)
             new_code = register_code[:-7] + "░" * 7
             await sendMessage(msg, 
                               f'· 🎟️ 续期码使用 - [{msg.from_user.first_name}](tg://user?id={msg.chat.id}) [{msg.from_user.id}] 使用了 {new_code}\n· 📅 实时到期 - {ex_new}',
