@@ -143,8 +143,12 @@ async def create(_, call):
 @bot.on_callback_query(filters.regex('changetg') & user_in_group_on_filter)
 async def change_tg(_, call):
     d = sql_get_emby(tg=call.from_user.id)
-    if not d:
-        return await callAnswer(call, '⚠️ 数据库没有你，请重新 /start录入', True)
+    # 如果当前用户在数据库中且没有 emby 账号，直接删除这条记录
+    if d and not d.embyid:
+        sql_delete_emby(tg=call.from_user.id)
+    d = sql_get_emby(tg=call.from_user.id)
+    # if not d:
+    #     return await callAnswer(call, '⚠️ 数据库没有你，请重新 /start录入', True)
     if d.embyid:
         return await callAnswer(call, '⚖️ 您已经拥有账户，请不要钻空子', True)
 
