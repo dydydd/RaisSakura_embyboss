@@ -15,6 +15,9 @@
   "emby_api": "xxxxx",
   "emby_url": "http://255.255.255.255:8096",
   "emby_line": "susuyyds.com",
+  "jellyfin_api": "xxxxx",
+  "jellyfin_url": "http://255.255.255.255:8097",
+  "jellyfin_line": "jellyfin.example.com",
   "db_host": "localhost",
   "db_user": "",
   "db_pwd": "",
@@ -23,6 +26,12 @@
     "nsfw"
   ],
   "extra_emby_libs": [
+    "电视"
+  ],
+  "jellyfin_block": [
+    "nsfw"
+  ],
+  "extra_jellyfin_libs": [
     "电视"
   ],
   "open": {

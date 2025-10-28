@@ -122,6 +122,11 @@ class Config(BaseModel):
     emby_block: Optional[List[str]] = []
     emby_line: str
     extra_emby_libs: Optional[List[str]] = []
+    jellyfin_api: str = ""
+    jellyfin_url: str = ""
+    jellyfin_block: Optional[List[str]] = []
+    jellyfin_line: str = ""
+    extra_jellyfin_libs: Optional[List[str]] = []
     db_host: str
     db_user: str
     db_pwd: str

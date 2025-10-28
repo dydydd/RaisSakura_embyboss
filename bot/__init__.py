@@ -38,6 +38,12 @@ emby_url = config.emby_url
 emby_line = config.emby_line
 emby_block = config.emby_block
 extra_emby_libs = config.extra_emby_libs
+# jellyfin设置
+jellyfin_api = config.jellyfin_api
+jellyfin_url = config.jellyfin_url
+jellyfin_line = config.jellyfin_line
+jellyfin_block = config.jellyfin_block
+extra_jellyfin_libs = config.extra_jellyfin_libs
 # # 数据库
 db_host = config.db_host
 db_user = config.db_user
@@ -114,12 +120,17 @@ owner_p = admin_p + [
     BotCommand("backup_db", "手动备份数据库[owner]"),
     BotCommand('restore_from_db', '恢复Emby账户[owner]'),
     BotCommand("config", "开启bot高级控制面板 [owner]"),
-    BotCommand("embylibs_unblockall", "一键开启所有用户的媒体库 [owner]"),
-    BotCommand("embylibs_blockall", "一键关闭所有用户的媒体库 [owner]")
+    BotCommand("embylibs_unblockall", "一键开启所有Emby用户的媒体库 [owner]"),
+    BotCommand("embylibs_blockall", "一键关闭所有Emby用户的媒体库 [owner]"),
+    BotCommand("jellyfinlibs_unblockall", "一键开启所有Jellyfin用户的媒体库 [owner]"),
+    BotCommand("jellyfinlibs_blockall", "一键关闭所有Jellyfin用户的媒体库 [owner]")
 ]
 if len(extra_emby_libs) > 0:
-    owner_p += [BotCommand("extraembylibs_blockall", "一键关闭所有用户的额外媒体库 [owner]"),
-                BotCommand("extraembylibs_unblockall", "一键开启所有用户的额外媒体库 [owner]")]
+    owner_p += [BotCommand("extraembylibs_blockall", "一键关闭所有Emby用户的额外媒体库 [owner]"),
+                BotCommand("extraembylibs_unblockall", "一键开启所有Emby用户的额外媒体库 [owner]")]
+if len(extra_jellyfin_libs) > 0:
+    owner_p += [BotCommand("extrajellyfinlibs_blockall", "一键关闭所有Jellyfin用户的额外媒体库 [owner]"),
+                BotCommand("extrajellyfinlibs_unblockall", "一键开启所有Jellyfin用户的额外媒体库 [owner]")]
 
 with contextlib.suppress(ImportError):
     import uvloop
