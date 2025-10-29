@@ -345,7 +345,7 @@ def sched_buttons():
                  InlineButton(f'{weekrank} 播放周榜', f'sched-weekrank'),
                  InlineButton(f'{dayplayrank} 看片日榜', f'sched-dayplayrank'),
                  InlineButton(f'{weekplayrank} 看片周榜', f'sched-weekplayrank'),
-                 InlineButton(f'{check_ex} 到期保号', f'sched-check_ex'),
+                 InlineButton(f'{check_ex} 每小时到期检测(1天后删除)', f'sched-check_ex'),
                  InlineButton(f'{low_activity} 活跃保号', f'sched-low_activity'),
                  InlineButton(f'{backup_db} 自动备份数据库', f'sched-backup_db'),
                  )

@@ -17,7 +17,7 @@ async def check_expired():
     rst = get_all_emby(and_(Emby.ex < datetime.now(), Emby.lv == 'b'))
     if rst is None:
         return LOGGER.info('【到期检测】- 等级 b 无到期用户，跳过')
-    dead_day = datetime.now() + timedelta(days=2)
+    dead_day = datetime.now() + timedelta(days=1)
     ext = (datetime.now() + timedelta(days=30))
     for r in rst:
         if r.us >= 30:
@@ -62,7 +62,7 @@ async def check_expired():
         else:
             if await emby.emby_change_policy(r.embyid, method=True):
                 if sql_update_emby(Emby.tg == r.tg, lv='c'):
-                    text = f'【到期检测】\n#id{r.tg} 到期禁用 [{r.name}](tg://user?id={r.tg})\n将为您封存至 {dead_day.strftime("%Y-%m-%d")}，请及时续期'
+                    text = f'【到期检测】\n#id{r.tg} 到期禁用 [{r.name}](tg://user?id={r.tg})\n将为您封存至 {dead_day.strftime("%Y-%m-%d")}（1天后删除），请及时续期'
                     LOGGER.info(text)
                 else:
                     text = f'【到期检测】\n#id{r.tg} 到期禁用 [{r.name}](tg://user?id={r.tg}) 已禁用，数据库写入失败'
@@ -129,11 +129,11 @@ async def check_expired():
                 LOGGER.error(e)
 
         else:
-            delta = c.ex + timedelta(days=2)
+            delta = c.ex + timedelta(days=1)
             if datetime.now() < delta:
                 continue
             if await emby.emby_del(c.embyid):
-                text = f'【到期检测】\n#id{c.tg} 删除账户 [{c.name}](tg://user?id={c.tg})\n已到期 2 天，执行清除任务。期待下次与你相遇'
+                text = f'【到期检测】\n#id{c.tg} 删除账户 [{c.name}](tg://user?id={c.tg})\n已到期 1 天，执行清除任务。期待下次与你相遇'
                 LOGGER.info(text)
                 
             else:
